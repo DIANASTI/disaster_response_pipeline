@@ -1,14 +1,14 @@
 # Disaster Response Pipeline Project
 
-##Introduction
+## Introduction
 ----------------------
 This project is part of Udacity, Data Scientist Nanodegree Program, Disaster Response Pipeline Project.
 The goal of this project is to use the real messages that were sent during disaster events and to create a machine learning pipeline that will categorize these events 
 so that  the messages can be sent to an appropriate disaster relief agency. 
-The time is critical during or even after disaster events, so such an application can be vert effective in faster providing the needed aid.
+Time is critical during or even after disaster events, so such an application can be very effective in providing needed aid faster.
 
 
-##Project Components
+## Project Components
 ----------------------
 There are three components  for this project.
 
@@ -29,17 +29,17 @@ Exports the final model as a pickle file
 3. Flask Web App
 Web app that displays under which queues the messages are classified
 
-##Dataset
+## Dataset
 ----------------------
 categories.csv - contains categories of the messages
 messages.csv - contains disaster response messages, the messages are reflected in both original and english languages
 
 
-##Project Structure
+## Project Structure
 ----------------------
  - app
-| - template
-| |- master.html  -  main page of web app
+	- template
+		- master.html  -  main page of web app
 | |- go.html  -  classification result page of web app
 |- run.py  -  Flask file that runs app
  - data
