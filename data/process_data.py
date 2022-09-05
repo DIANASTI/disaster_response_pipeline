@@ -5,6 +5,18 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+    '''
+    load_data
+    This function loads data from csv files and merges to a single pandas dataframe
+    
+    Input:
+    messages_filepath - filepath to messages csv file
+    categories_filepath - filepath to categories csv file
+    
+    Returns:
+    df - dataframe merging categories and messages
+    '''
+
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     # merge datasets
@@ -13,6 +25,17 @@ def load_data(messages_filepath, categories_filepath):
 
 
 def clean_data(df):
+    '''
+    clean_data
+    This function split the categories column into separate columns
+    
+    Input:
+    df - dataframe to be cleaned
+    
+    Returns:
+    df - dataframe cleaned
+    '''
+    
     # create a dataframe of the 36 individual category columns
     categories =  df['categories'].str.split(';',n=-1,expand=True)
     # select the first row of the categories dataframe
@@ -47,12 +70,28 @@ def clean_data(df):
     
     # drop duplicates
     df = df.drop_duplicates()
+    
+    #replace 2 value with 1 for related column
+    df.loc[df['related'] > 1, 'related'] = 1
+    
     return df
 
 
 def save_data(df, database_filename):
+    '''
+    save_data
+    This function saves the dataframe into a database file
+    
+    Input:
+    df - dataframe to be saved
+    database_filename - database file name that will contain the saved data
+    
+    Returns:
+    none
+    '''
+   
     engine = create_engine('sqlite:///' + database_filename)
-    df.to_sql('data', engine, index=False)
+    df.to_sql('data', engine, index=False, if_exists='replace')
 
 
 def main():
@@ -77,7 +116,7 @@ def main():
               'datasets as the first and second argument respectively, as '\
               'well as the filepath of the database to save the cleaned data '\
               'to as the third argument. \n\nExample: python process_data.py '\
-              'disaster_messages.csv disaster_categories.csv '\
+              'messages.csv categories.csv '\
               'DisasterResponse.db')
 
 
