@@ -7,8 +7,10 @@ import pickle
 import re
 import numpy as np
 import nltk
-#nltk.download('punkt')
-#nltk.download('wordnet')
+from nltk.corpus import stopwords
+nltk.download('punkt')
+nltk.download('wordnet')
+nltk.download('stopwords')
 
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -19,11 +21,25 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.pipeline import Pipeline
 from sklearn.multioutput import MultiOutputClassifier
 from sklearn.metrics import classification_report
+from sklearn.model_selection import GridSearchCV
 
 
 
 def load_data(database_filepath):
-    # load data from database
+    '''
+    load_data
+    This function loads data from database to a dataframe
+    
+    Input:
+    database_filepath - filepath to the database file
+    
+    Returns:
+    X - list of messages
+    Y - category columns
+    category_names - names of the category columns
+    '''
+   
+   # load data from database
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql("SELECT * FROM data", engine)
     Y = df.values[:, df.shape[1]-36:df.shape[1]].astype('int')
@@ -33,7 +49,23 @@ def load_data(database_filepath):
 
 
 def tokenize(text):
+    '''
+    tokenize
+    This function splits the text into tokens, converts to lower case
+    
+    Input:
+    text - the text to be processed
+    
+    Returns:
+    clean_tokens - array of processed tokens
+    '''
+    
+    # tokenize text
     tokens=word_tokenize(text)
+    # Remove stop words
+    stop_words=stopwords.words("english")
+    tokens = [tok for tok in tokens if tok not in stop_words]
+
     lemmatizer=WordNetLemmatizer()
     
     clean_tokens=[]
@@ -45,6 +77,16 @@ def tokenize(text):
 
 
 def build_model():
+    '''
+    build_model
+    This function builds the model pipeline that will be trained
+    
+    Input:
+    none
+    
+    Returns:
+    cv - returns the pipline to be fit to the data
+    '''
 
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
@@ -52,12 +94,33 @@ def build_model():
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
     
-    best_params = {'clf__estimator__min_samples_split': 3, 'clf__estimator__n_estimators': 200, 'vect__ngram_range': (1, 2)}
-    pipeline.set_params(**best_params)
+    parameters = {
+        'clf__estimator__n_estimators': [50,100,200],
+        'vect__ngram_range': ((1,1),(1,2)),
+        'clf__estimator__min_samples_split': [2,3,4]
+    }
+
+    cv = GridSearchCV(pipeline, param_grid=parameters, refit=True)
     
-    return pipeline
+    #best_params = {'clf__estimator__min_samples_split': 3, 'clf__estimator__n_estimators': 200, 'vect__ngram_range': (1, 2)}
+    #pipeline.set_params(**best_params)
+    
+    return cv
     
 def display_results(cv, y_test, y_pred):
+    '''
+    display_results
+    This function display confusion matrix and accuracy of the model
+    
+    Input:
+    cv - model
+    y_test - test values
+    y_pred - predicted values
+    
+    Returns:
+    none
+    '''
+    
     labels=np.unique(y_pred)
     confusion_mat=confusion_matrix(y_test, y_pred, labels=labels)
     accuracy=(y_pred==y_test).mean()
@@ -65,18 +128,44 @@ def display_results(cv, y_test, y_pred):
     print("Labels:", labels)
     print("Confusion Matrix:\n", confusion_mat)
     print("Accuracy:", accuracy)
-#    print("\nBest Parameters:", cv.best_params_)
+    print("\nBest Parameters:", cv.best_params_)
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    '''
+    evaluate_model
+    This function displays the metrics for each category
+    
+    Input:
+    model - model
+    X_test - test messages 
+    Y_test - test categories
+    category_names - names of categories
+    
+    Returns:
+    none
+    '''
+    
     y_pred = model.predict(X_test)
     for i in range(0, 36):
         print(category_names[i])
-        #print(classification_report(y_test[:,i], y_pred[:,i]))
+        print(classification_report(Y_test[:,i], y_pred[:,i]))
         display_results(model, Y_test[:,i], y_pred[:,i])
 
 
 def save_model(model, model_filepath):
+    '''
+    save_model
+    This function saves the model to *.pkl file 
+    
+    Input:
+    model - model
+    model_filepath - filepath for the model
+    
+    Returns:
+    none
+    '''
+   
     pickle.dump(model, open(model_filepath,'wb'))
 
 
