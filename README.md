@@ -10,7 +10,7 @@ Time is critical during or even after disaster events, so such an application ca
 
 ## Project Components
 ----------------------
-There are three components  for this project.
+There are three components  for this project:
 
 1. ETL Pipeline
 Loads the messages and categories datasets
@@ -29,10 +29,11 @@ Exports the final model as a pickle file
 3. Flask Web App
 Web app that displays under which queues the messages are classified
 
+
 ## Dataset
 ----------------------
-categories.csv - contains categories of the messages
-messages.csv - contains disaster response messages, the messages are reflected in both original and english languages
+1. categories.csv - contains categories of the messages
+2. messages.csv - contains disaster response messages, the messages are reflected in both original and english languages
 
 
 ## Project Structure
@@ -40,16 +41,16 @@ messages.csv - contains disaster response messages, the messages are reflected i
  - app
 	- template
 		- master.html  -  main page of web app
-| |- go.html  -  classification result page of web app
-|- run.py  -  Flask file that runs app
+		- go.html  -  classification result page of web app
+	- run.py  -  Flask file that runs app
  - data
-|- categories.csv  -  data to process
-|- messages.csv  -  data to process
-|- process_data.py
-|- InsertDatabaseName.db  -  database to save clean data to
+	- categories.csv  -  data to process
+	- messages.csv  -  data to process
+	- process_data.py - cleans the data and save into SQLite db 
+	- DisasterResponse.db  -  database to save clean data to
  - models
-|- train_classifier.py
-|- classifier.pkl  -  saved model
+	- train_classifier.py - trains the model
+	- classifier.pkl  -  saved model
  - README.md
 
 
